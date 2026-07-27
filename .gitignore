@@ -1,0 +1,144 @@
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.env.local
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.DS_Store
+frontend/dist/
+
+# Backend
+backend/venv/
+backend/.venv/
+backend/env/
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/.env
+backend/.env.local
+backend/chromadb_data/
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/dist/
+backend/build/
+backend/*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.c9/
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+.~lock.*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# IDE specific
+.vscode/
+.idea/
+*.iml
+
+# Python
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Node
+package-lock.json
+yarn.lock
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# ChromaDB
+chromadb_data/
+*.chroma/
+
+# AI/ML
+models/
+embeddings/
+cache/
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
+# Project specific
+*.pem
+*.key
+*.crt
+*.p12
+credentials.json
+
+# Cache
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+.env
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+
+# Backup files
+*.bak
+*.orig
+*.backup

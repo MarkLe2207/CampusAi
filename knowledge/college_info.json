@@ -1,0 +1,12 @@
+{
+  "institution": {
+    "name": "Centennial College",
+    "type": "Community College",
+    "location": "Toronto, Ontario, Canada",
+    "established": 1974,
+    "website": "https://www.centennialcollege.ca",
+    "phone": "Contact information here",
+    "email": "Contact information here"
+  },
+  "description": "Placeholder for Centennial College information. To be populated with official college data."
+}
