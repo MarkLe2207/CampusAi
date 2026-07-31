@@ -1,12 +1,13 @@
-# CampusAI Meeting 4 Deliverables & Instructions
+# CampusAI Meeting 4 Deliverables and Execution Guide
 
 **Meeting 4 Date**: August 2, 2026  
+**Current Date**: Friday, July 31, 2026  
 **Status**: In Progress  
-**Theme**: Core AI integration goes live — CampusAI should actually answer questions by the end of this sprint.
+**Theme**: Core AI integration goes live. CampusAI should answer real student questions by the end of this sprint.
 
 ---
 
-## 📊 Deliverable Overview
+## Deliverable Overview
 
 | Team Member | Role | Deliverable | Priority |
 |---|---|---|---|
@@ -14,465 +15,757 @@
 | **Mathew** | AI Research Lead | Finalize knowledge base accuracy, source metadata, retrieval QA | CRITICAL |
 | **Syed** | UI/UX Lead | Real chat frontend connected to `/api/chat` | HIGH |
 | **Mark** | Documentation Lead | Finalize PRD/SRS, create API.md, update board, start Final Report | HIGH |
-| **Nairobi** | QA & Presentation Lead | Finalize Charter, 80% slides, Test Plan, demo script, start integration testing | HIGH |
+| **Nairobi** | QA and Presentation Lead | Finalize Charter, 80% slides, Test Plan, demo script, start integration testing | HIGH |
 
-**Dependency chain**: Mathew's knowledge base quality → Abrar's RAG pipeline → Syed's frontend demo → Nairobi's integration testing/demo. Mark's docs run in parallel but must reflect what's actually built by the end.
+**Dependency chain**: Mathew's knowledge quality -> Abrar's RAG backend -> Syed's frontend demo -> Nairobi's integration testing and demo rehearsal. Mark's docs run in parallel but must match what is actually built.
+
+---
+
+## Execution Contract
+
+This section is the Meeting 4 source of truth for implementation details. If any task wording below is vague, use this section first.
+
+### Current Backend State as of Friday, July 31, 2026
+
+- Abrar's backend Meeting 4 work is already implemented locally and pushed.
+- Live endpoints exist for:
+  - `POST /api/chat`
+  - `POST /api/query`
+  - `POST /api/feedback`
+  - `GET /api/conversations/{conversation_id}`
+- Knowledge-base indexing command:
+  - `python -m app.services.knowledge_loader --reset`
+- Chroma persistence directory:
+  - `backend/chromadb_data/`
+- Default local runtime values now checked into the backend:
+  - `OLLAMA_BASE_URL=http://localhost:11434`
+  - `OLLAMA_MODEL=qwen2.5:3b-instruct`
+  - `OLLAMA_TIMEOUT_SECONDS=180`
+  - `EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2`
+  - `CHROMA_COLLECTION_NAME=centennial_knowledge_base`
+- Acceptable stronger local model if someone already has it installed:
+  - `qwen2.5:7b-instruct`
+
+### Required Knowledge Metadata Format
+
+Every `knowledge/**/*.md` file should use YAML frontmatter in this exact shape:
+
+```markdown
+---
+title: Progress Campus
+source_url: https://www.centennialcollege.ca/campuses/progress/
+---
+
+# Progress Campus
+
+Content here...
+```
+
+Rules:
+
+- `title` is required.
+- `source_url` is optional.
+- If `source_url` is present, it must be a real official source.
+- If there is no single reliable source URL, omit `source_url`.
+- Do not invent URLs.
+- Keep file topics focused. Split overly broad files when retrieval quality suffers.
+- Keep the first heading aligned with the file topic whenever possible.
+
+### Live API Contract
+
+All backend responses use this envelope:
+
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "Success",
+  "error": null
+}
+```
+
+#### `POST /api/chat`
+
+Request:
+
+```json
+{
+  "message": "Where is Progress Campus?",
+  "conversation_id": "conv_123"
+}
+```
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "response": "Progress Campus is located at 941 Progress Ave., Scarborough, ON M1G 3T8.",
+    "sources": [
+      {
+        "title": "Centennial College: Campuses and Facilities",
+        "excerpt": "## Progress Campus **Address:** 941 Progress Ave., Scarborough, ON M1G 3T8 ...",
+        "url": null,
+        "section": "Progress Campus",
+        "source_path": "facilities/centennial_facilities.md",
+        "relevance": 0.57
+      }
+    ],
+    "conversation_id": "conv_123"
+  },
+  "message": "Chat response generated successfully",
+  "error": null
+}
+```
+
+#### `POST /api/query`
+
+Request:
+
+```json
+{
+  "query": "Where is Progress Campus?",
+  "context": "I am looking for business programs."
+}
+```
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "answer": "Progress Campus is located at 941 Progress Ave., Scarborough, ON M1G 3T8.",
+    "confidence": 0.75,
+    "sources": [
+      {
+        "title": "Centennial College: Campuses and Facilities",
+        "excerpt": "## Progress Campus **Address:** 941 Progress Ave., Scarborough, ON M1G 3T8 ...",
+        "url": null,
+        "section": "Progress Campus",
+        "source_path": "facilities/centennial_facilities.md",
+        "relevance": 0.57
+      }
+    ]
+  },
+  "message": "Query processed successfully",
+  "error": null
+}
+```
+
+#### `POST /api/feedback`
+
+Request:
+
+```json
+{
+  "response_id": "resp_123",
+  "rating": 5,
+  "comment": "Very helpful."
+}
+```
+
+#### `GET /api/conversations/{conversation_id}`
+
+Response `data` shape:
+
+```json
+{
+  "conversation_id": "conv_123",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Where is Progress Campus?",
+      "timestamp": "2026-07-31T18:00:00+00:00"
+    },
+    {
+      "role": "assistant",
+      "content": "Progress Campus is located at 941 Progress Ave., Scarborough, ON M1G 3T8.",
+      "timestamp": "2026-07-31T18:00:05+00:00"
+    }
+  ]
+}
+```
+
+Frontend and QA note:
+
+- `success: true` does not always mean the model answered normally.
+- If Ollama is unavailable, the backend may still return `success: true` with a graceful fallback message and any retrieved citations.
+- Treat that as a degraded state, not a UI crash.
+
+### Required Proof of Done
+
+Every owner should be able to show all of the following by Saturday, August 2, 2026:
+
+- The exact files they changed.
+- One concrete proof artifact:
+  - screenshot, test run, API response, or demo output.
+- A short summary of what is complete and what is still not complete.
+- Work pushed to GitHub.
+
+Recommended proof by role:
+
+- Abrar: `pytest` output and one working `/api/chat` or `/api/query` example.
+- Mathew: `knowledge/RETRIEVAL_TEST_LOG.md` with at least 20 questions.
+- Syed: screenshot or local demo of the chat UI hitting the real backend.
+- Mark: committed docs files that match live backend behavior.
+- Nairobi: committed test plan, demo script, and first-round integration notes.
 
 ---
 
-## 🧑‍💻 ABRAR — PROJECT LEAD / BACKEND INTEGRATION (YOU)
+## Abrar - Project Lead / Backend Integration
 
-### Goal: Make CampusAI actually answer questions.
+### Goal
 
----
+Make CampusAI actually answer questions.
 
 ### Task 1: Integrate LangChain into the Backend
 
-**What to Do**:
-1. Wire `LangChain` into `backend/app/services/rag_service.py` (scaffold already exists from Meeting 3).
+**What to do**
+
+1. Wire LangChain into `backend/app/services/rag_service.py`.
 2. Replace placeholder logic with real LangChain components:
-   - `RecursiveCharacterTextSplitter` for chunking (reuse Mathew's already-chunked files where possible)
-   - `HuggingFaceEmbeddings` (`all-MiniLM-L6-v2`) for embeddings
-   - `Chroma` vectorstore wrapper pointing at `backend/chromadb_data/`
-   - `RetrievalQA` or `ConversationalRetrievalChain` for the actual Q&A chain
-3. Keep prompt templates in a dedicated file (e.g. `backend/app/services/prompts.py`) rather than inline strings — easier for Mathew to tune later.
+   - `RecursiveCharacterTextSplitter`
+   - `HuggingFaceEmbeddings` using `all-MiniLM-L6-v2`
+   - `Chroma` vectorstore wrapper
+   - retrieval chain logic for query answering
+3. Keep prompt templates in a dedicated file such as `backend/app/services/prompts.py`.
 
-**Deliverable**: LangChain fully wired into `rag_service.py`, no more placeholder responses.
-
----
+**Deliverable**: `rag_service.py` no longer returns placeholder retrieval behavior.
 
 ### Task 2: Load the Knowledge Base into ChromaDB
 
-**What to Do**:
-1. Implement `backend/app/services/knowledge_loader.py` (scaffold referenced since Meeting 3, not yet built):
-   - Walk `knowledge/` directory (all `.md` files across `departments/`, `programs/`, `facilities/`, `policies/`, plus the main knowledge base file)
-   - Chunk each doc, generate embeddings, upsert into Mathew's `centennial_knowledge_base` collection via `backend/init_chroma.py`'s client config
-   - Attach metadata to each chunk (source file, section title) — this is what Mathew's "source metadata" work feeds into
-2. Add a one-off script or CLI entry point to (re)run indexing on demand, e.g. `python -m app.services.knowledge_loader`
-3. Confirm collection persists correctly in `backend/chromadb_data/` (already gitignored).
+**What to do**
 
-**Deliverable**: Running the loader populates ChromaDB with the full knowledge base, ready for retrieval.
+1. Implement `backend/app/services/knowledge_loader.py`.
+2. Walk the `knowledge/` directory and index all `.md` and relevant `.json` knowledge sources.
+3. Chunk documents, generate embeddings, and upsert them into the `centennial_knowledge_base` collection.
+4. Attach chunk metadata for citations:
+   - `title`
+   - `section`
+   - `source_path`
+   - `source_url` when available
+5. Support rerunning indexing with:
+   - `python -m app.services.knowledge_loader --reset`
 
----
+**Deliverable**: Running the loader populates ChromaDB with the current knowledge base.
 
 ### Task 3: Connect Ollama to the RAG Pipeline
 
-**What to Do**:
-1. Implement real Ollama calls in `backend/app/services/llm_service.py` (currently placeholder text).
-2. Use the OpenAI-compatible endpoint at `OLLAMA_BASE_URL` (`config.py`, default `http://localhost:11434`) with model `OLLAMA_MODEL` (default `mistral`).
-3. Keep the existing `is_available()` health check meaningful — return `False` gracefully if Ollama isn't running, so the API degrades instead of crashing.
-4. No OpenAI fallback (per earlier decision — Ollama only).
+**What to do**
 
-**Deliverable**: `LLMService.generate_response()` returns real model output instead of the placeholder string.
+1. Implement real Ollama calls in `backend/app/services/llm_service.py`.
+2. Use the OpenAI-compatible endpoint at `OLLAMA_BASE_URL`.
+3. Use the checked-in default model `qwen2.5:3b-instruct` unless there is a documented reason to switch.
+4. Keep `is_available()` meaningful and graceful when Ollama is not running.
+5. Do not add an OpenAI fallback.
 
----
+**Deliverable**: `LLMService.generate_response()` returns real model output.
 
 ### Task 4: `/api/chat` Returns Real AI Responses
 
-**What to Do**:
-1. Update `ChatService.process_chat_message()` to actually pass a real `RAGService` instance instead of `rag_service=None` (currently hardcoded in `routes.py`).
-2. Instantiate `RAGService` + `LLMService` once (module-level or FastAPI dependency) and inject into `ChatService` calls in `app/api/routes.py`.
-3. Verify multi-turn conversation history still works end-to-end with real responses.
+**What to do**
 
-**Deliverable**: A POST to `/api/chat` with a real student question returns a real, grounded answer.
+1. Pass a real `RAGService` instance into `ChatService`.
+2. Instantiate `RAGService` and `LLMService` once and inject them in `backend/app/api/routes.py`.
+3. Verify multi-turn conversation history still works.
 
----
+**Deliverable**: A real student question to `/api/chat` returns a grounded answer.
 
 ### Task 5: Return Source Citations with Each Response
 
-**What to Do**:
-1. Use the metadata attached during indexing (Task 2) to populate the `sources` field in `ChatResponse` / `QueryResponse`.
-2. Each source should include at least `title` and `excerpt` (matches existing `Source` schema in `app/schemas/chat.py`) — add `url`/section reference if Mathew provides it.
-3. Confirm this lines up with Syed's "Verified Seal" citation UI concept from the Meeting 3 design system.
+**What to do**
 
-**Deliverable**: Every chat/query response includes real, traceable source citations — not placeholder text.
+1. Populate `sources` in chat and query responses from indexed metadata.
+2. Each source should include at least:
+   - `title`
+   - `excerpt`
+3. Include these when available:
+   - `url`
+   - `section`
+   - `source_path`
+   - `relevance`
 
----
+**Deliverable**: Responses include traceable citations instead of placeholders.
 
 ### Task 6: Basic Integration Tests
 
-**What to Do**:
-1. Extend `backend/tests/test_api.py` (or add `backend/tests/test_rag_pipeline.py`) with tests that exercise the real pipeline:
-   - Knowledge base loads without errors
-   - A known question returns a non-empty answer with at least one source
-   - Ollama-unavailable case degrades gracefully (mock or skip if Ollama isn't running in CI)
-2. Keep existing unit tests passing — they used `rag_service=None`, so confirm behavior didn't silently change for that path.
+**What to do**
 
-**Deliverable**: Test suite covers the real RAG path, not just the API contract.
+1. Extend `backend/tests/test_api.py` or add `backend/tests/test_rag_pipeline.py`.
+2. Cover:
+   - knowledge base loads successfully
+   - known question returns non-empty answer with at least one source
+   - Ollama-unavailable case degrades gracefully
+3. Keep existing API contract tests passing.
 
----
+**Deliverable**: Test suite covers the real RAG path.
 
-### Success Criteria for Abrar:
+### Success Criteria for Abrar
 
-- ✅ Backend answers real questions using the knowledge base (not placeholders)
-- ✅ Swagger UI (`/docs`) demo works live — can type a question into `/api/chat` and get a grounded answer with sources
-- ✅ Integration tests passing
-- ✅ Code pushed to GitHub
+- Backend answers real knowledge-based questions.
+- Swagger UI at `/docs` can demo a grounded answer.
+- Integration tests pass.
+- Code is pushed to GitHub.
 
-### Files to Create/Modify:
-- `backend/app/services/rag_service.py` (replace placeholders with real LangChain)
-- `backend/app/services/llm_service.py` (real Ollama calls)
-- `backend/app/services/knowledge_loader.py` (NEW — indexing pipeline)
-- `backend/app/services/prompts.py` (NEW — prompt templates)
-- `backend/app/api/routes.py` (wire real `RAGService`/`LLMService` into `ChatService` calls)
-- `backend/tests/test_rag_pipeline.py` (NEW — integration tests)
+### Files to Create or Modify
 
----
-
-## 📚 MATHEW — AI RESEARCH LEAD
-
-### Goal: Ensure the knowledge base produces accurate answers.
+- `backend/app/services/rag_service.py`
+- `backend/app/services/llm_service.py`
+- `backend/app/services/knowledge_loader.py`
+- `backend/app/services/prompts.py`
+- `backend/app/api/routes.py`
+- `backend/tests/test_rag_pipeline.py`
 
 ---
 
-### Task 1: Finish All Official Centennial Knowledge Files
+## Mathew - AI Research Lead
 
-**What to Do**:
-1. Complete the department/program/facility/policy files started in the Meeting 3 restructure (PR #4).
-2. Make sure every major student-facing topic has a file: admissions, tuition/financial aid, programs by school, campus locations/hours, key student services, important dates.
-3. Cross-check facts against official Centennial College sources; flag anything time-sensitive (tuition, deadlines) as "verify before stating."
+### Goal
 
-**Deliverable**: Knowledge base is complete enough to answer the majority of common student questions.
+Ensure the knowledge base produces accurate answers.
 
+### Task 1: Finish Official Centennial Knowledge Files
+
+**What to do**
+
+1. Complete the department, program, facility, and policy files.
+2. Make sure the major student-facing topics exist:
+   - admissions
+   - tuition and financial aid
+   - programs by school
+   - campus locations and hours
+   - key student services
+   - important dates
+3. Cross-check facts against official Centennial sources.
+4. Flag time-sensitive facts with wording such as "verify before stating" when appropriate.
+
+**Deliverable**: Knowledge base is broad enough to answer common student questions.
+
+### Task 2: Add Source Metadata
+
+**What to do**
+
+1. Add YAML frontmatter to each knowledge markdown file.
+2. Use this exact minimum format:
+
+```markdown
 ---
-
-### Task 2: Add Source Metadata (Title/URL if Applicable)
-
-**What to Do**:
-1. For each knowledge file, add a small metadata header (or accompanying frontmatter) with at least: `title`, and `source_url` if the info came from a specific official page.
-2. This metadata is what Abrar's `knowledge_loader.py` (Task 2 above) will attach to each indexed chunk — coordinate on the exact format (simple YAML frontmatter at the top of each `.md` file is easiest):
-   ```markdown
-   ---
-   title: Admissions Requirements
-   source_url: https://www.centennialcollege.ca/admissions/
-   ---
-   ```
-3. Where no single official URL exists, use `source_url: internal` or omit it — don't fabricate a link.
-
-**Deliverable**: Every knowledge file has clear title/source metadata ready for citation display.
-
+title: Admissions Requirements
+source_url: https://www.centennialcollege.ca/admissions/
 ---
+```
+
+3. `title` is required.
+4. Omit `source_url` when no single official source URL exists.
+5. Do not fabricate links.
+
+**Deliverable**: Every knowledge file has usable title/source metadata.
 
 ### Task 3: Test at Least 20 Sample Questions
 
-**What to Do**:
-1. Once Abrar's indexing pipeline is up, run at least 20 realistic student questions through the system (via Swagger `/api/query` or `/api/chat`), e.g.:
-   - "What are the admissions requirements for the Business program?"
-   - "How much does tuition cost per semester?"
-   - "Where is the Progress Campus located?"
-   - "What support services are available for international students?"
-2. Record each question + the answer + whether it was accurate/relevant in a simple table.
+**What to do**
 
-**Deliverable**: A documented test log of 20+ Q&A pairs with pass/fail notes.
+1. Once indexing is ready, run at least 20 realistic student questions through `/api/query` or `/api/chat`.
+2. Record:
+   - question
+   - expected answer summary
+   - actual answer summary
+   - source file(s) returned
+   - pass/fail
+   - notes
 
-**Suggested File**: `knowledge/RETRIEVAL_TEST_LOG.md`
+**Deliverable**: A retrieval test log with 20 or more questions.
 
----
+**Suggested file**: `knowledge/RETRIEVAL_TEST_LOG.md`
 
 ### Task 4: Fix Missing or Inaccurate Knowledge
 
-**What to Do**:
-1. From the Task 3 test log, identify gaps (questions with no good answer) or inaccuracies (wrong info retrieved).
-2. Add/correct the relevant knowledge files.
-3. Re-run the failing questions to confirm the fix worked (may require Abrar to re-run the indexing loader).
+**What to do**
 
-**Deliverable**: Known gaps from testing are closed; knowledge base measurably improved.
+1. Identify gaps and inaccuracies from the retrieval log.
+2. Correct the relevant files.
+3. Re-run failed questions after the fix.
 
----
+**Deliverable**: Known gaps are closed and retrieval quality improves.
 
-### Task 5: Improve Chunking if Retrieval Quality is Poor
+### Task 5: Improve Chunking if Retrieval Quality Is Poor
 
-**What to Do**:
-1. If Task 3 shows retrieval pulling irrelevant chunks, work with Abrar on chunk size/overlap tuning in the loader (`RecursiveCharacterTextSplitter` params), or restructure files so each section is more self-contained (avoid huge multi-topic sections).
-2. Prefer smaller, focused files/sections over long documents — easier for the vector search to isolate relevant content.
+**What to do**
 
-**Deliverable**: Retrieval returns relevant chunks for the majority of test questions.
+1. If retrieval quality is weak, work with Abrar on chunk size and overlap tuning.
+2. Prefer smaller, focused files and sections over long mixed-topic documents.
 
----
+**Deliverable**: Retrieval returns relevant chunks for most test questions.
 
-### Success Criteria for Mathew:
+### Success Criteria for Mathew
 
-- ✅ Most common student questions return relevant, accurate information
-- ✅ Every knowledge file has source metadata
-- ✅ 20+ test questions logged with results
-- ✅ Files pushed to GitHub
+- Most common student questions return relevant, accurate content.
+- Every knowledge file has source metadata.
+- 20 or more questions are tested and logged.
+- Files are pushed to GitHub.
 
-### Files to Create/Modify:
-- `knowledge/**/*.md` (complete + add frontmatter metadata to all files)
-- `knowledge/RETRIEVAL_TEST_LOG.md` (NEW — 20+ test Q&A results)
+### Files to Create or Modify
 
----
-
-## 🎨 SYED — UI/UX LEAD
-
-### Goal: Build the real frontend.
+- `knowledge/**/*.md`
+- `knowledge/RETRIEVAL_TEST_LOG.md`
 
 ---
+
+## Syed - UI/UX Lead
+
+### Goal
+
+Build the real frontend.
 
 ### Task 1: Chat Interface, Message Bubbles, Input Box, Loading Indicator
 
-**What to Do**:
-1. Implement the components specified in the Meeting 3 design doc (`frontend/Next.js Frontend Layout Components.md`, from PR #3) as real React/TypeScript components:
-   - `ChatMessage.tsx` — message bubble (user vs. assistant styling, using the Ink Navy / Parchment / Paper White palette already defined)
-   - `ChatInput.tsx` — input box + send button
-   - A loading/typing indicator shown while waiting for the backend response
-2. Assemble these into a chat page (e.g. `frontend/app/chat/page.tsx`).
+**What to do**
 
-**Deliverable**: A working, styled chat UI running locally via `npm run dev`.
+1. Implement the components described in `frontend/Next.js Frontend Layout Components.md`.
+2. Build:
+   - `ChatMessage.tsx`
+   - `ChatInput.tsx`
+   - loading or typing indicator
+3. Assemble them into a real chat page such as `frontend/app/chat/page.tsx`.
 
----
+**Deliverable**: Styled chat UI runs locally with `npm run dev`.
 
 ### Task 2: Connect to `/api/chat`
 
-**What to Do**:
-1. Implement `frontend/lib/api.ts` with a function to call Abrar's live `/api/chat` endpoint (base URL from `NEXT_PUBLIC_API_URL`, already configured in `next.config.js`).
-2. Send `{ message, conversation_id }`, handle the `ResponseModel` wrapper (`success`, `data`, `message`, `error`) already used by the backend.
-3. Handle loading and error states (e.g. Ollama not running, network error) gracefully in the UI.
+**What to do**
 
-**Deliverable**: Typing a question in the browser and hitting send returns a real backend response.
+1. Implement `frontend/lib/api.ts`.
+2. Call the live backend using `NEXT_PUBLIC_API_URL`.
+3. Send:
 
----
+```json
+{
+  "message": "Where is Progress Campus?",
+  "conversation_id": "conv_123"
+}
+```
+
+4. Handle the `ResponseModel` envelope:
+   - `success`
+   - `data`
+   - `message`
+   - `error`
+5. Persist and reuse `data.conversation_id` across follow-up turns.
+6. Render `data.response` and `data.sources` exactly as returned.
+7. Handle:
+   - network failures
+   - `success: false`
+   - degraded `success: true` fallback messages when Ollama is unavailable
+
+**Deliverable**: Typing a question in the browser returns a real backend response.
 
 ### Task 3: Display Citations
 
-**What to Do**:
-1. Implement `SourceCitation.tsx` per the "Verified Seal" concept from the design doc — render the `sources` array returned in the chat response (title + excerpt at minimum).
-2. Keep it visually distinct but not distracting from the main answer.
+**What to do**
 
-**Deliverable**: Each AI response visibly shows where its information came from.
+1. Implement `SourceCitation.tsx` using the citation data from the backend.
+2. Show at least:
+   - title
+   - excerpt
+3. Optionally show:
+   - section
+   - source file path
+   - source URL
 
----
+**Deliverable**: Every AI response visibly shows where the answer came from.
 
 ### Task 4: Responsive Layout
 
-**What to Do**:
-1. Confirm the chat page works cleanly on mobile, tablet, and desktop breakpoints using Tailwind (already configured).
-2. Test scroll behavior in the message list, and that the input box stays usable on small screens.
+**What to do**
 
-**Deliverable**: Chat UI is usable across device sizes.
+1. Test mobile, tablet, and desktop layouts.
+2. Verify message scrolling.
+3. Verify the input box remains usable on small screens.
 
----
+**Deliverable**: Chat UI is usable across screen sizes.
 
-### Success Criteria for Syed:
+### Success Criteria for Syed
 
-- ✅ User can ask a question from the browser and receive a real AI response with citations
-- ✅ UI is responsive
-- ✅ Code pushed to GitHub
+- User can ask a question in the browser and receive a real AI response.
+- Citations render in the UI.
+- Layout is responsive.
+- Code is pushed to GitHub.
 
-### Files to Create/Modify:
+### Files to Create or Modify
+
 - `frontend/components/ChatMessage.tsx`
 - `frontend/components/ChatInput.tsx`
 - `frontend/components/SourceCitation.tsx`
-- `frontend/components/ConversationList.tsx` (if time permits — history view)
+- `frontend/components/ConversationList.tsx` if time permits
 - `frontend/app/chat/page.tsx`
 - `frontend/lib/api.ts`
 - `frontend/types/chat.ts`
 
 ---
 
-## 📄 MARK — DOCUMENTATION LEAD
+## Mark - Documentation Lead
 
-### Goal: Finalize project documentation.
+### Goal
 
----
+Finalize project documentation against the actual implementation.
 
 ### Task 1: Finish PRD
 
-**What to Do**:
-1. Take the Meeting 3 draft (`docs/PRD.md`) and finalize it against what's actually being built this sprint: real RAG answers, citations, chat UI.
-2. Make sure MVP feature list matches reality — no features listed that were descoped, no missing ones that got added.
+**What to do**
+
+1. Finalize `docs/PRD.md` against the real Meeting 4 scope.
+2. Make sure the MVP list matches what is actually implemented.
 
 **Deliverable**: Finalized `docs/PRD.md`.
 
----
-
 ### Task 2: Finish SRS
 
-**What to Do**:
-1. Finalize `docs/SRS.md` with confirmed functional + non-functional requirements.
-2. Cross-check functional requirements against the actual `/api/chat`, `/api/query`, `/api/feedback` behavior once Abrar's integration lands.
+**What to do**
+
+1. Finalize `docs/SRS.md`.
+2. Cross-check requirements against the actual backend behavior for:
+   - `/api/chat`
+   - `/api/query`
+   - `/api/feedback`
 
 **Deliverable**: Finalized `docs/SRS.md`.
 
----
-
 ### Task 3: Create API.md
 
-**What to Do**:
-1. Document all live endpoints in `docs/API.md`:
-   - `POST /api/chat`, `POST /api/query`, `POST /api/feedback`, `GET /api/conversations/{id}`
-   - Request/response examples (reuse the schema examples already in `backend/app/schemas/chat.py`)
-   - Note the standard response envelope: `{ success, data, message, error }`
-2. Link to the live Swagger docs at `/docs` for interactive testing.
+**What to do**
 
-**Deliverable**: `docs/API.md` accurately reflects the real, integrated API (not the stub version from Meeting 3).
+1. Document all live endpoints in `docs/API.md`.
+2. Use the exact live API contract from the "Execution Contract" section above.
+3. Include request and response examples.
+4. Document the standard response envelope:
+   - `{ success, data, message, error }`
+5. Document the degraded-response case where `success` may still be `true`.
+6. Link to Swagger at `/docs`.
 
----
+**Deliverable**: `docs/API.md` matches the real integrated backend.
 
 ### Task 4: Update GitHub Project Board
 
-**What to Do**:
-1. Move Meeting 3 items to Done, add Meeting 4 tasks (this doc) with owners and due date (Aug 2).
-2. Keep board status in sync as tasks complete during the sprint.
+**What to do**
 
-**Deliverable**: Board reflects current sprint reality at all times.
+1. Move Meeting 3 items to Done.
+2. Add or update Meeting 4 tasks with owners and due date of August 2, 2026.
+3. Keep board status current.
 
----
+**Deliverable**: Board reflects real sprint status.
 
 ### Task 5: Start Final Report
 
-**What to Do**:
-1. Create `docs/FINAL_REPORT.md` (or a shared doc) with a skeleton structure now, even if mostly empty:
-   - Project summary, objectives, what was built, tech stack, team contributions, challenges, results, future work
-2. Fill in sections as they become true (e.g. tech stack, team contributions can be written now).
+**What to do**
 
-**Deliverable**: Final Report skeleton exists and is partially filled in — ready to complete for Meeting 5.
+1. Create `docs/FINAL_REPORT.md` or the agreed shared equivalent.
+2. Start sections for:
+   - project summary
+   - objectives
+   - what was built
+   - tech stack
+   - team contributions
+   - challenges
+   - results
+   - future work
 
----
+**Deliverable**: Final Report skeleton exists and is partially filled in.
 
-### Success Criteria for Mark:
+### Success Criteria for Mark
 
-- ✅ Documentation matches the implemented project
-- ✅ Board is current
-- ✅ Final Report started
-- ✅ Files pushed to GitHub
+- Documentation matches the real implementation.
+- Project board is current.
+- Final Report has started.
+- Files are pushed to GitHub.
 
-### Files to Create/Modify:
-- `docs/PRD.md` (finalize)
-- `docs/SRS.md` (finalize)
-- `docs/API.md` (NEW)
-- `docs/FINAL_REPORT.md` (NEW — skeleton)
+### Files to Create or Modify
+
+- `docs/PRD.md`
+- `docs/SRS.md`
+- `docs/API.md`
+- `docs/FINAL_REPORT.md`
 - GitHub Projects board
 
 ---
 
-## 🎤 NAIROBI — QA & PRESENTATION LEAD
+## Nairobi - QA and Presentation Lead
 
-### Goal: Prepare for demo day.
+### Goal
 
----
+Prepare for demo day and start integration testing.
 
 ### Task 1: Project Charter Finalized
 
-**What to Do**:
-1. Finalize `docs/PROJECT_CHARTER.md` (started Meeting 3) — confirm scope, objectives, constraints, stakeholders all still match reality.
-2. Get sign-off from all team members.
+**What to do**
 
-**Deliverable**: Signed-off, final Project Charter.
+1. Finalize `docs/PROJECT_CHARTER.md`.
+2. Confirm scope, constraints, stakeholders, and objectives still match reality.
+3. Get team sign-off.
 
----
+**Deliverable**: Final Project Charter.
 
-### Task 2: Presentation Slides (80% Complete)
+### Task 2: Presentation Slides 80% Complete
 
-**What to Do**:
-1. Continue building the deck outlined in Meeting 3 instructions (problem, solution, features, stack, architecture, demo, challenges, roadmap).
-2. Target 80% completion by Aug 2 — content mostly locked, demo section can stay flexible until closer to Meeting 5.
-3. Coordinate with Abrar/Syed on what the live demo will actually show, so the slides match reality.
+**What to do**
 
-**Deliverable**: Slide deck ~80% complete, structurally done.
+1. Continue the deck from Meeting 3.
+2. Include:
+   - problem
+   - solution
+   - features
+   - stack
+   - architecture
+   - demo
+   - challenges
+   - roadmap
+3. Coordinate with Abrar and Syed so the demo slides match the actual system.
 
----
+**Deliverable**: Slide deck is structurally complete and about 80% done.
 
 ### Task 3: Test Plan
 
-**What to Do**:
-1. Create/finalize `docs/TEST_PLAN.md`: unit tests (Abrar's), integration tests (RAG pipeline + frontend), E2E workflow tests, edge cases (empty input, very long queries, Ollama down).
-2. Include a manual QA checklist for demo readiness.
+**What to do**
 
-**Deliverable**: `docs/TEST_PLAN.md` complete and actionable.
+1. Create `docs/TEST_PLAN.md`.
+2. Cover:
+   - Abrar's backend tests
+   - RAG pipeline integration tests
+   - frontend-backend integration tests
+   - end-to-end workflow tests
+   - empty input
+   - very long input
+   - Ollama down
+3. Include degraded-state testing:
+   - backend reachable, Ollama unavailable
+   - frontend cannot reach backend
+   - citations returned but answer quality is weak
+4. Include a manual QA checklist for demo readiness.
 
----
+**Deliverable**: `docs/TEST_PLAN.md` is complete and actionable.
 
 ### Task 4: Demo Script
 
-**What to Do**:
-1. Write a concrete demo script/`docs/DEMO_SCRIPT.md`: sample questions to ask live, expected answers, what to highlight (citations, responsiveness, etc.), fallback plan if something breaks live.
+**What to do**
 
-**Deliverable**: Demo script ready to rehearse against the real system.
+1. Create `docs/DEMO_SCRIPT.md`.
+2. Include at least:
+   - one campus-location question
+   - one admissions or program question
+   - one student-services question
+   - one fallback note if Ollama is slow or unavailable
+3. For each demo step, note what should be highlighted.
 
----
+**Deliverable**: Demo script is ready for rehearsal.
 
 ### Task 5: Begin Integration Testing
 
-**What to Do**:
-1. Once Abrar's backend + Syed's frontend are connected, actually run through the full flow as a QA pass: ask real questions in the browser, verify answers + citations look right, log any bugs.
-2. Feed findings back to Abrar/Mathew/Syed as needed.
+**What to do**
 
-**Deliverable**: A first round of integration test results, bugs filed/flagged.
+1. Once Syed's frontend is connected, test the full browser-to-backend flow.
+2. Verify:
+   - answers appear
+   - citations appear
+   - error states are understandable
+   - degraded Ollama behavior is not confusing
+3. Log bugs and send findings back to the team.
 
-### Success Criteria for Nairobi:
+**Deliverable**: First-pass integration testing is underway and findings are recorded.
 
-- ✅ Team can rehearse the presentation
-- ✅ Test plan and demo script exist and are usable
-- ✅ Integration testing underway with findings shared
-- ✅ Files pushed to GitHub
+### Success Criteria for Nairobi
 
-### Files to Create/Modify:
-- `docs/PROJECT_CHARTER.md` (finalize)
-- `docs/PRESENTATION_SLIDES` (80% complete)
+- Team can rehearse the presentation.
+- Test plan and demo script exist and are usable.
+- Integration testing has started with recorded findings.
+- Files are pushed to GitHub.
+
+### Files to Create or Modify
+
+- `docs/PROJECT_CHARTER.md`
+- `docs/PRESENTATION_SLIDES`
 - `docs/TEST_PLAN.md`
 - `docs/DEMO_SCRIPT.md`
 
 ---
 
-## 📌 COORDINATION NOTES
+## Coordination Notes
 
-**Critical Path**: Mathew's knowledge base metadata format (Task 2) must be agreed with Abrar early — it determines how citations get built. Talk to each other before either of you goes too far down your own path.
+### Critical Path
 
-**Blockers to Watch**:
-- Abrar's RAG pipeline needs Mathew's knowledge base to be reasonably complete to test against meaningfully — can start with what exists now and iterate.
-- Syed's frontend needs Abrar's `/api/chat` returning real (not placeholder) responses to do meaningful integration testing — can build UI against the existing contract in the meantime.
-- Nairobi's integration testing needs both Abrar and Syed's pieces connected — plan this for the second half of the sprint.
-- Mark's API.md and Final Report should be written last, once behavior is confirmed, to avoid rework.
+Mathew's metadata format must match Abrar's loader expectations. Use the YAML frontmatter format in this document and do not invent alternatives during Meeting 4.
 
-**GitHub**: All work on feature branches → PR → review → merge to master, same as Meeting 3. Clear commit messages required.
+### Blockers to Watch
+
+- Abrar's backend is ready enough for the rest of the team to work against now.
+- Mathew should improve metadata and retrieval quality before final QA.
+- Syed should build against the live `/api/chat` contract in this document.
+- Nairobi's meaningful integration testing depends on Syed connecting the frontend.
+- Mark should document what is live, not what was originally planned.
+
+### GitHub
+
+All work should follow the team's normal GitHub flow:
+
+- feature branch when practical
+- clear commits
+- PR
+- review
+- merge to `master`
+
+If time is too tight, keep changes small and still make sure the final pushed work is reviewable.
 
 ---
 
-## 🎯 FINAL CHECKLIST (August 2)
+## Final Checklist for Saturday, August 2, 2026
 
-### Abrar (Project Lead)
+### Abrar
+
 - [ ] LangChain integrated into backend
 - [ ] Knowledge base loaded into ChromaDB
-- [ ] Ollama connected to RAG pipeline
+- [ ] Ollama connected to the RAG pipeline
 - [ ] `/api/chat` returns real AI responses
 - [ ] Source citations returned with each response
 - [ ] Basic integration tests passing
 
-### Mathew (AI Research)
-- [ ] All official Centennial knowledge files finished
+### Mathew
+
+- [ ] Official Centennial knowledge files finished
 - [ ] Source metadata added to knowledge files
-- [ ] 20+ sample questions tested and logged
-- [ ] Missing/inaccurate knowledge fixed
+- [ ] 20 or more sample questions tested and logged
+- [ ] Missing or inaccurate knowledge fixed
 - [ ] Chunking improved if retrieval quality was poor
 
-### Syed (UI/UX)
-- [ ] Chat interface, message bubbles, input box, loading indicator built
+### Syed
+
+- [ ] Chat interface, input, and loading indicator built
 - [ ] Connected to `/api/chat`
 - [ ] Citations displayed
 - [ ] Responsive layout confirmed
 
-### Mark (Documentation)
+### Mark
+
 - [ ] PRD finished
 - [ ] SRS finished
 - [ ] API.md created
 - [ ] GitHub Project Board updated
 - [ ] Final Report started
 
-### Nairobi (QA & Presentation)
+### Nairobi
+
 - [ ] Project Charter finalized
-- [ ] Presentation slides ~80% complete
+- [ ] Presentation slides about 80% complete
 - [ ] Test Plan written
 - [ ] Demo script written
 - [ ] Integration testing begun
 
 ---
 
-## 💡 Key Success Factors
+## Key Success Factors
 
-1. **Talk before you build** — Mathew's metadata format and Abrar's loader need to match.
-2. **Build against the real thing as soon as it exists** — Syed and Nairobi should switch from placeholders to real endpoints/answers as soon as Abrar's pipeline is live, not wait until the last day.
-3. **Log everything you test** — Mathew's Q&A log and Nairobi's integration findings are what make Meeting 5 easy.
-4. **Docs follow reality, not the plan** — Mark should write API.md and the Final Report against what's actually built.
+1. Talk before making format changes. Mathew and Abrar must not diverge on metadata shape.
+2. Build against the live system as soon as possible. Do not wait until the last day to switch off placeholders.
+3. Log what you test. Retrieval notes and QA findings are part of the deliverable, not optional extras.
+4. Docs should follow reality. Mark should document the real backend and real frontend once connected.
 
-**Let's make CampusAI actually talk.** 🚀
+CampusAI should be demo-ready by the end of this sprint, not just architecturally planned.
