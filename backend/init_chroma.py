@@ -1,9 +1,13 @@
 import chromadb
+from chromadb.config import Settings as ChromaSettings
+from config import settings
 
-# Initialize the client inside the backend/chromadb_data folder
-client = chromadb.PersistentClient(path="./chromadb_data")
+settings.chroma_db_dir.mkdir(parents=True, exist_ok=True)
+client = chromadb.PersistentClient(
+    path=str(settings.chroma_db_dir),
+    settings=ChromaSettings(anonymized_telemetry=False, allow_reset=True),
+)
 
-# Create your collection
-collection = client.get_or_create_collection(name="centennial_knowledge_base")
+collection = client.get_or_create_collection(name=settings.CHROMA_COLLECTION_NAME)
 
-print("Chroma Database initialized in the backend folder!")
+print(f"Chroma Database initialized at {settings.chroma_db_dir}")
