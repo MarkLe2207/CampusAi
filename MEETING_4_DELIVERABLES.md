@@ -721,43 +721,86 @@ If time is too tight, keep changes small and still make sure the final pushed wo
 
 ### Abrar
 
-- [ ] LangChain integrated into backend
-- [ ] Knowledge base loaded into ChromaDB
-- [ ] Ollama connected to the RAG pipeline
-- [ ] `/api/chat` returns real AI responses
-- [ ] Source citations returned with each response
-- [ ] Basic integration tests passing
+- [x] LangChain integrated into backend
+- [x] Knowledge base loaded into ChromaDB
+- [x] Ollama connected to the RAG pipeline
+- [x] `/api/chat` returns real AI responses
+- [x] Source citations returned with each response
+- [x] Basic integration tests passing
 
 ### Mathew
 
 - [ ] Official Centennial knowledge files finished
+  - `knowledge/college_info.json` is still a placeholder and needs real data populated
+  - Check for missing or incomplete content in: `knowledge/departments/centennial_departments.md`, `knowledge/facilities/centennial_facilities.md`, `knowledge/policies/centennial_policies.md`, `knowledge/programs/centennial_programs (1).md`
+  - Ensure all major student-facing topics are covered: admissions, tuition and financial aid, programs by school, campus locations and hours, key student services, important dates
 - [ ] Source metadata added to knowledge files
+  - None of the current `.md` files have YAML frontmatter; every file needs a block like the following added at the very top:
+    ```
+    ---
+    title: ...
+    source_url: ...
+    ---
+    ```
+  - `title` is required; `source_url` is optional — only include a real official Centennial URL, never a fabricated one
+  - Files to update: `knowledge/departments/centennial_departments.md`, `knowledge/facilities/centennial_facilities.md`, `knowledge/policies/centennial_policies.md`, `knowledge/programs/centennial_programs (1).md`, and any other `.md` files under `knowledge/`
 - [ ] 20 or more sample questions tested and logged
+  - Create `knowledge/RETRIEVAL_TEST_LOG.md` and record each question with: question text, expected answer summary, actual answer summary, source file(s) returned, pass/fail, and notes
+  - Run questions through `POST /api/query` or `POST /api/chat` once the knowledge base is indexed with `python -m app.services.knowledge_loader --reset`
 - [ ] Missing or inaccurate knowledge fixed
+  - Depends on results in `knowledge/RETRIEVAL_TEST_LOG.md` — edit the relevant `.md` files under `knowledge/` for each failed or inaccurate result
+  - Re-run failed questions after each fix to confirm retrieval quality has improved
 - [ ] Chunking improved if retrieval quality was poor
+  - Edit `backend/config.py` — tune the `CHUNK_SIZE` and `CHUNK_OVERLAP` values if retrieval is returning irrelevant or truncated content
+  - Coordinate with Abrar before changing chunking parameters; re-run the knowledge loader (`python -m app.services.knowledge_loader --reset`) after any change to rebuild the index
 
 ### Syed
 
 - [ ] Chat interface, input, and loading indicator built
+  - Create `frontend/components/ChatMessage.tsx` — renders individual user and assistant message bubbles
+  - Create `frontend/components/ChatInput.tsx` — text input box and send button
+  - Create `frontend/components/LoadingIndicator.tsx` — typing/loading indicator shown while awaiting the backend response
+  - Create `frontend/app/chat/page.tsx` — assembles the above components into the main chat page
 - [ ] Connected to `/api/chat`
+  - Create `frontend/lib/api.ts` — implement a function that POSTs to `/api/chat` using `NEXT_PUBLIC_API_URL`, sends `{ message, conversation_id }`, and returns the full `ResponseModel` envelope
+  - Handle `success: false` and degraded `success: true` (Ollama unavailable) states — do not crash the UI in either case
+  - Persist and reuse `data.conversation_id` for follow-up turns within the same session
 - [ ] Citations displayed
+  - Create `frontend/components/SourceCitation.tsx` — renders the `sources` array from `data.sources`; show at minimum `title` and `excerpt`; optionally show `section`, `source_path`, and `url` when present
 - [ ] Responsive layout confirmed
+  - Apply Tailwind CSS breakpoints (`sm:`, `md:`, `lg:`) in `frontend/components/ChatMessage.tsx`, `frontend/components/ChatInput.tsx`, and `frontend/app/chat/page.tsx`
+  - Verify the input box remains accessible and the message list scrolls correctly on small screens
 
 ### Mark
 
 - [ ] PRD finished
+  - Update `docs/PRD.md` — file is currently marked "Draft" with a Meeting 3 note; remove the draft marker, align the MVP feature list with what is actually implemented in the backend, and ensure the stated scope matches Meeting 4 reality
 - [ ] SRS finished
+  - Update `docs/SRS.md` — same issue as PRD; still marked "Draft"; cross-check all requirements against the live endpoints (`/api/chat`, `/api/query`, `/api/feedback`) and finalize
 - [ ] API.md created
+  - Create `docs/API.md` — document all 4 live endpoints: `POST /api/chat`, `POST /api/query`, `POST /api/feedback`, `GET /api/conversations/{id}`
+  - Refer to `backend/app/api/routes.py` for route definitions and `backend/app/schemas/chat.py` for exact request/response shapes
+  - Include the standard response envelope `{ success, data, message, error }`, request/response JSON examples (use the examples in the Execution Contract section of this document), and the degraded-state note where `success: true` does not guarantee a full model answer
+  - Link to the live Swagger docs at `/docs`
 - [ ] GitHub Project Board updated
+  - No file needed — update the board directly on GitHub: move Meeting 3 items to Done, add or update Meeting 4 tasks with owner names and due date August 2, 2026
 - [ ] Final Report started
+  - Create `docs/FINAL_REPORT.md` with skeleton sections: project summary, objectives, what was built, tech stack, team contributions, challenges, results, future work
 
 ### Nairobi
 
 - [ ] Project Charter finalized
+  - Create `docs/PROJECT_CHARTER.md` — confirm scope, constraints, stakeholders, and objectives still match the actual project; get team sign-off before Meeting 4
 - [ ] Presentation slides about 80% complete
+  - Create `docs/PRESENTATION_OUTLINE.md` as a written outline/placeholder if the slides live in Google Slides or another external tool — include slide titles and bullet-point content for: problem, solution, features, stack, architecture, demo walkthrough, challenges, and roadmap
 - [ ] Test Plan written
+  - Create `docs/TEST_PLAN.md` — cover backend unit tests, RAG pipeline integration tests, frontend-backend integration tests, end-to-end workflow tests, edge cases (empty input, very long input, Ollama down), and a manual QA checklist for demo readiness; include degraded-state scenarios (backend reachable but Ollama unavailable; frontend cannot reach backend)
 - [ ] Demo script written
+  - Create `docs/DEMO_SCRIPT.md` — include at least one campus-location question, one admissions or program question, one student-services question, and a fallback note for when Ollama is slow or unavailable; annotate each step with what should be highlighted to the audience
 - [ ] Integration testing begun
+  - Run the existing test suite first: `pytest backend/tests/test_api.py` and `pytest backend/tests/test_rag_pipeline.py`
+  - Once Syed's frontend is connected, test the full browser-to-backend flow: verify answers and citations appear, error states are understandable, and degraded Ollama behavior does not cause confusing UI states
+  - Log bugs and send findings back to the team
 
 ---
 
