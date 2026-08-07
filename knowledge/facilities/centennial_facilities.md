@@ -1,3 +1,8 @@
+---
+title: Campuses and Facilities
+source_url: https://www.centennialcollege.ca/about-centennial/campuses/
+---
+
 # Centennial College: Campuses and Facilities
 
 Centennial College operates five main campuses across Toronto, Ontario, plus a dedicated Performing Arts Centre. All campuses offer general hours of operation Monday to Friday, 7 a.m. to 11 p.m., and Saturday to Sunday, 7 a.m. to 5 p.m. All campuses have 24-hour security.
@@ -75,6 +80,7 @@ Downsview is Centennial's aerospace-focused campus, supporting Aviation Technici
 - **Food Services:** cafeterias and dining locations vary by campus, managed through the campus dining hub
 - **Bookstores:** on-site or nearby at every campus
 - **Interactive campus maps and virtual/in-person campus tours** are available for every location
+- **Student Housing:** Centennial's only on-campus residence is Centennial Place Residence, located at Progress Campus and open to domestic students, international students, and University of Toronto Scarborough students. It's operated by a third-party residence manager, so current rates, fees, and application steps should be confirmed directly rather than assumed — verify before stating exact costs. Off-campus housing search support is available through CCSAI. See the Departments file (Centennial Housing Service) for contact details.
 
 ## Quick Reference for the AI Receptionist
 - **Business, hospitality, culinary programs →** Progress Campus
@@ -82,3 +88,4 @@ Downsview is Centennial's aerospace-focused campus, supporting Aviation Technici
 - **Automotive programs →** Ashtonbee Campus
 - **Media, communications, design, performing arts →** Story Arts Centre / Performing Arts Centre
 - **Aviation and aerospace programs →** Downsview Campus
+- **"Where can I live on campus?" →** Centennial Place Residence at Progress Campus; direct students to the Centennial Housing Service for current rates and applications (verify before stating exact costs).
