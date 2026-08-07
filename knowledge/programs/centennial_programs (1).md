@@ -1,3 +1,8 @@
+---
+title: Program Offerings and Credentials
+source_url: https://www.centennialcollege.ca/programs-and-courses
+---
+
 # Centennial College: Program Offerings and Credentials
 
 Centennial College offers over 160 full-time programs, along with part-time and continuing education options, across five campuses and eight academic Schools.
@@ -53,6 +58,11 @@ Centennial College offers over 160 full-time programs, along with part-time and 
 - Typical minimum requirements are approximately IELTS 6.0–6.5 overall (with no band below 5.5–6.0) for most programs; some postgraduate programs require higher scores (e.g., 7.0 overall for certain business or IT security programs).
 - Required documents generally include academic transcripts, proof of English proficiency, a valid passport, and — once accepted — a valid Canadian study permit.
 - International applicants apply directly to Centennial (not through ontariocolleges.ca) and are supported by regional International Admissions teams.
+
+### Application Deadlines
+- For Fall-entry programs, **February 1 is Centennial's "Equal Consideration" deadline** — applying by then means being considered alongside all other early applicants, though most programs continue accepting applications afterward on a rolling, space-available basis.
+- Winter- and Summer-entry programs have their own, earlier priority windows.
+- Deadlines and application fees are set/updated periodically — verify the current-cycle date and fee with Admissions / Enrolment Services before stating them as fact, rather than repeating a prior year's figure.
 
 ## Flagship Programs Across Domains
 
@@ -218,3 +228,4 @@ Sourced from Centennial's official 2026–2027 Viewbook and Program Listing. Thi
 - **"I already have a degree — what are my options?" →** Graduate Certificate or Fast-Track programs.
 - **"What English test score do I need?" →** Varies by program; general guidance is IELTS 6.0–6.5 overall, but always confirm with the specific program page.
 - **"Does Centennial offer [specific program]?" →** Check the Full-Time Program Directory above, organized by School. If not listed there, it may be a part-time, micro-credential, or continuing-education offering — direct the student to centennialcollege.ca/programs-and-courses to search the live catalogue.
+- **"When's the application deadline?" →** February 1 is the standard Equal Consideration date for Fall entry, but verify the current-year date and any program-specific deadlines with Admissions before stating them as fact.

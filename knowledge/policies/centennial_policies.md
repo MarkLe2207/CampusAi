@@ -1,3 +1,8 @@
+---
+title: Core Student and Academic Policies
+source_url: https://www.centennialcollege.ca/about-centennial/college-overview/college-policies
+---
+
 # Centennial College: Core Student and Academic Policies
 
 This document summarizes the key policies that a virtual receptionist would need to explain to students and visitors. For complete, up-to-date policy text, students should always be directed to the official College Policies page or myCentennial.
@@ -43,6 +48,13 @@ Centennial College uses a standard letter-grade scale for most courses, converte
 
 ## Tuition Payment and Refund Policy
 
+**Representative tuition fee ranges (published 2025–2026 schedule — verify before stating exact figures, since Ontario tuition guidelines are revised most years):**
+- Post-secondary certificates, diplomas, and advanced diplomas: about **$2,721 CAD/year** for domestic students; about **$16,400–$17,150 CAD/year** for international students (international fees in the School of Engineering Technology and Applied Science and School of Transportation run slightly higher, roughly $17,460–$18,250/year).
+- Four-year Honours Bachelor Degree programs: about **$5,990–$7,150 CAD/year** for domestic students; about **$19,175–$21,720 CAD/year** for international students, depending on the specific degree.
+- Bachelor of Science in Nursing (BScN): about **$6,223 CAD/year** domestic; about **$36,180 CAD/year** international.
+- These figures are base tuition only and exclude mandatory ancillary fees (health/dental insurance, student services, technology, athletics, CCSAI fees), which vary by program and are billed on top of tuition.
+- Always point students to the official Tuition and Fees pages or their myCentennial account for the current-year number rather than repeating a figure from a prior term.
+
 **Payment:**
 - Fee Statements specify a payment deadline; a minimum tuition payment (commonly $250) may be required to hold a seat.
 - Late payment results in a late fee (commonly $150) applied once per semester to the outstanding balance.
@@ -60,6 +72,24 @@ Centennial College uses a standard letter-grade scale for most courses, converte
 - Students who accept an offer but later decide not to enroll for other reasons do not receive a refund of their initial deposit.
 - The same 10-school-day rule for partial refunds of paid fees generally applies.
 
+## Academic Calendar and Important Dates
+
+Centennial runs three main intakes per year — **Fall** (starts September), **Winter** (starts January), and **Summer** (starts May) — each roughly 14–15 weeks of instruction followed by a final assessment period.
+
+**Confirmed Fall 2026 dates (from the College's official registration page, current as of this writing):**
+- Tuition deposit due: Thursday, June 25, 2026
+- Fall 2026 semester begins for most day programs: Tuesday, September 8, 2026
+- Course Change (add/drop) deadline: Tuesday, September 15, 2026
+- Deadline to withdraw with a partial refund: Tuesday, September 22, 2026
+
+**General patterns — verify before stating an exact date, since deadlines are republished (and can shift) every semester:**
+- Reading week typically falls around mid-October for the Fall semester and late February for the Winter semester.
+- The course-change and partial-refund-withdrawal deadlines generally land within the first two to three weeks of a semester (see the 10-school-day refund rule above).
+- Convocation ceremonies are generally held in fall and spring each year; exact dates are announced separately.
+- Registration/timetable selection windows, tuition deposit deadlines, and course-change deadlines are set independently for each of the Fall, Winter, and Summer semesters — never assume a date from one semester applies to another.
+
+**Where to send students for current dates:** the College's official "College Events and Academic Deadlines" listing and semester-specific "Academic and Planning Calendar" pages are the authoritative, continuously updated sources. Direct students there (or to myCentennial) rather than repeating a date from a previous term.
+
 ## Student Rights and Responsibilities / Code of Conduct
 
 - Centennial's Student Rights and Responsibilities framework, including the **Student Code of Conduct Policy**, sets expectations for respectful, honest, and lawful behaviour on campus and in online learning environments.
@@ -72,4 +102,6 @@ Centennial College uses a standard letter-grade scale for most courses, converte
 - **"What counts as plagiarism?" →** refer to Academic Honesty and Plagiarism Policy summary above.
 - **"How is my GPA calculated?" →** refer to Grading System table above; for exact calculations, direct to the myCentennial GPA Calculator.
 - **"Can I get a refund if I withdraw?" →** refer to the 10-school-day rule under Tuition Payment and Refund Policy; for specifics, direct to Enrolment Services.
+- **"How much is tuition?" →** give the representative fee range above as a ballpark, but verify before stating an exact number — figures are published annually and vary by program and student status (domestic/international).
+- **"When does the semester start / what's the withdrawal or add-drop deadline?" →** refer to Academic Calendar and Important Dates above for general patterns, but always confirm the exact current-term date via the official Academic and Planning Calendar — these are republished every semester.
 - **"What if I have a conduct complaint?" →** refer to the Student Rights and Responsibilities / Code of Conduct section; direct to the Student Experience Office.
